@@ -1,96 +1,112 @@
-﻿== Использование и реализация блока b-layout-table 
+﻿== Использование и реализация блока b-search
 
-Блок ##b-layout-table## — таблица со 100% шириной, для создания раскладки.
+Блок ##b-search## — поисковая форма, состоящая из поля ввода и кнопки.\\
 
-BEMHTML шаблон блока выводит таблицу, строки и ячейки со всеми необходимыми атрибутами.
-
+BEMJSON блока:
 %%hl js
-block b-layout-table {
-    tag: 'table'
-    elem row, tag: 'tr'
-    this.elem === 'cell' || this.elem === 'gap' {
-        tag: 'td'
-        attrs: {
-
-            var ctx = this.ctx,
-                a = {},
-                props = ['colspan', 'rowspan'], p;
-
-            while(p = props.shift()) ctx[p] && (a[p] = ctx[p]);
-
-            return a;
-        }
+{
+    block: 'b-search',
+    attrs: { action: '/search.xml' },
+    input: {
+        elem: 'input',
+        attrs: { value: 'Text' }
+    },
+    button: {
+        elem: 'button'
     }
 }
 %%
 
-Ячейки блока могут быть представлены либо елементом cell, либо элементом gap.
-Элемент cell предназначен для вложения контента, а элемент gap служит распоркой.
-
-Давайте рассмотрим BEMJSON блока:
-
 %%hl js
 {
-    block: 'b-layout-table',
-    mods: { layout: '58-40'},
-    content: [
-        {
-            elem: 'row',
+    block: 'b-search',
+    attrs: { action: '/search.xml' },
+    input: {
+        elem: 'input',
+        attrs: { value: 'Text' }
+    },
+    button: {
+        elem: 'button'
+    },
+    under: {
+        block: 'b-link',
+        url: '/',
+        content: 'Advanced search'
+    }
+}
+%%
+
+Шаблон по моде content определяет разметку для основной части блока. Для раскладки используем блок b-layout-table. Для сокращения каскада, миксируем элементы b-layout-table с элементами блока b-search.
+%%hl js
+block b-search {
+
+    ...
+
+    content, this.ctx.input, this.ctx.button: {
+        this.ctx.input.block = 'b-search';
+        this.ctx.button.block = 'b-search';
+
+        var c = {
+            block: 'b-layout-table',
+            mix: [ { block: 'b-search', elem: 'layout'} ],
             content: [
                 {
-                    elem: 'gap',
-                    rowspan: '2'
-                },
-                {
-                    elem: 'cell',
-                    content: {
-                        elem: 'inner',
-                        content: 'Left cell'
-                    }
-                },
-                {
-                    elem: 'cell',
-                    elemMods: { position: 'r'},
-                    content: 'Right cell'
-                }
-            ]
-        },
-        {
-            elem: 'row',
-            content: [
-                {
-                    elem: 'cell',
-                    colspan: '2',
-                    content: 'Second row and one cell'
+                    elem: 'row',
+                    content: [
+                        {
+                            elem: 'cell',
+                            mix: [ { block: 'b-search', elem: 'layout-input' } ],
+                            content: this.ctx.input
+                        },
+                        {
+                            elem: 'cell',
+                            mix: [ { block: 'b-search', elem: 'layout-button' } ],
+                            content: this.ctx.button
+                        }
+                    ]
                 }
             ]
         }
-    ]
-}
+        this.ctx.under && c.content.push(
+            {
+                elem: 'row',
+                content: [
+                    {
+                      elem: 'cell',
+                      mix: [ { block: 'b-search', elem: 'layout-under' } ],
+                      colspan: 2,
+                      content: this.ctx.under
+                    }
+                ]
+            });
+
+        return c;
+    }
 %%
+
+BEMHTML шаблон миксирует блок/элементы b-layout-table с элементами блока b-search, выводит текстовое поле
+Раскладка для поисковой строки и кнопки реализована таблицей, которая в свою очередь является блоком b-layout-table и элементом блока b-search
+Рассмотрим BEMHTML шаблон по частям.
+В первой части мы выводи тег и предоставляем добисывать атрибуты форме.
+%%hl js
+block b-search {
+    tag: 'form'
+    attrs, !this.elem, !this.ctx._attr: {
+        var attrs,
+            default_attrs = {};
+
+        this.ctx.attrs && this.ctx.attrs.action;
+
+        local(this.ctx._attr = true)
+            attrs = this.apply() || {};
+
+        return this._.extend(default_attrs, attrs);
+    }
+%%
+
+Блок/элементы b-layout-table миксируются с элементами блока b-search
 
 По умолчанию в блоке не задаются ширины ячейкам. Доопределить блок своими стилями можно следующим образом: добавляем модификатор блоку — ##mods: { layout: '58-40'}## и ячейке — ##elemMods: { position: 'r'}##.
 Элементом inner оборачиваем контент ячеек, что позволяет задать нужные нам отступы. Далее, используя каскад, задаем нужные нам CSS свойства.
 
-Вот такой CSS получится к BEMJSON, приведенному выше:
 
-%%hl css
-.b-layout-table_layout_58-40 .b-layout-table__cell_position_r
-{
-    width: 40%;
-}
-
-.b-layout-table_layout_58-40 .b-layout-table__gap
-{
-    width: 2%;
-    padding-left: 20px;
-}
-
-.b-layout-table_layout_58-40 .b-layout-table__inner
-{
-    margin-right: 0.8em;
-}
-%%
-
-Обратите внимание, что нельзя задавать самому блоку никаких дополнительных CSS свойств, это может привести к конфликтам в верстке, так как блок может быть использован в реализации других блоков.
-Важно: использовать блок нужно, задавая ему модификатор или миксируя его с другим блоком/элементом.
