@@ -1,13 +1,10 @@
 ﻿== Использование блока b-menu-vert
 
-((http://bem.github.com/bem-bl/sets/common-desktop/b-menu-vert/b-menu-vert.ru.html Блок ##b-menu-vert##)) - это меню с вертикальной ориентацией.
-
-На ((http://bem.github.com/bem-bl/sets/common-desktop/b-menu-vert/b-menu-vert.ru.html странице документации блока))
-видно, что у блока есть разные элементы. Но не все они обязательны к использованию.
+Блок ##b-menu-vert## создает ##html##-разметку для горизонтального меню.
 
 === Простое вертикальное меню
 
-В простейшем случае в BEMJSON достаточно объявить блок и перечислить его элементы
+В простейшем случае в ##bemjson## достаточно объявить блок и перечислить его элементы
 ##item## в свойстве ##content##:
 
 %%hl js
@@ -27,7 +24,7 @@
 }
 %%
 
-В получившемся HTML появляются не только узлы для блока и явно заданных элементов ##item##, но и
+В получившемся ##html## появляются не только узлы для блока и явно заданных элементов ##item##, но и
 разметка для элементов ##layout## и ##layout-unit##. Эти элементы отвечают за геометрическую
 отрисовку блока.
 
@@ -58,9 +55,9 @@
 }
 %%
 
-Кроме того, у одного из элементов ##item## может быть модификатор ##{ state : 'current' }##,
+Кроме того, у одного из элементов ##item## может быть модификатор ##{ state: 'current' }##,
 отмечающий выделенный пункт меню. Модификатор используется как для визуального выделения
-пункта при помощи CSS-правил для этого модификатора, так и для описания функционального
+пункта при помощи ##css##-правил для этого модификатора, так и для описания функционального
 поведения.
 
 %%hl js
@@ -298,8 +295,8 @@ bem-bl ((https://github.com/bem/bem-bl/blob/master/blocks-desktop/b-menu-vert/ex
       elem: 'item',
       content: {
         block: 'b-link',
-        mods: { pseudo: 'yes', inner: 'yes'},
-        mix: [{ block: 'b-menu-vert', elem: 'trigger'],
+        mods: { pseudo: 'yes', inner: 'yes' },
+        mix: [{ block: 'b-menu-vert', elem: 'trigger' }],
         content: [
           {
             block: 'b-icon',
@@ -316,7 +313,7 @@ bem-bl ((https://github.com/bem/bem-bl/blob/master/blocks-desktop/b-menu-vert/ex
         elem: 'item-content',
         content: {
           block: 'b-menu-vert',
-          mods: { 'type' : 'submenu' },
+          mods: { 'type': 'submenu' },
           content: [
             {
               elem: 'item',
